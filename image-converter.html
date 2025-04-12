@@ -1,0 +1,155 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Everyday tools! Utilities.</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="homepage is-preload">
+		<div id="page-wrapper">
+
+			<!-- Header -->
+			<section id="header">
+<div style="display: flex;align-items: center;justify-content: center;flex-wrap: wrap;gap: 20px;padding: 0 1em;text-align: right;">
+	<!-- Logo -->
+	<h1 style="margin: 0;">
+		<a href="index.html" style="text-decoration: none;">
+			<span style="color: black;">Util</span><span style="color: rgb(199, 44, 65);">ities</span>
+		</a>
+	</h1>
+<!-- Separator -->
+<div style="font-size: 2em; color: #ccc;">|</div>
+	<!-- Banner -->
+	<div style="text-align: left;">
+		<h2 style="margin: 0;">All Your Everyday Tools, <span style="color: rgb(199, 44, 65);">One</span> Click Away.</h2>
+		<p style="margin: 0;">One Toolkit. Endless Possibilities.</p>
+	</div>
+</div>
+			</section>
+
+			<!-- Main -->
+			<section id="main">
+				<div class="container">
+					<header class="major">
+						<h2>Image Format <span style="color: rgb(199, 44, 65);">Converter</span></h2>
+					</header>
+
+                    <section class="box">
+                        <header>
+                          <h3>Convert your image to PNG, JPG, WEBP, or BMP</h3>
+                        </header>
+                      
+                        <div style="display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center;">
+                          <!-- Left Column -->
+                          <div style="flex: 1; min-width: 250px;">
+                            <div style="margin-bottom: 1rem;">
+                              <label for="imageInput" style="font-weight: bold;">Upload Image</label><br />
+                              <input type="file" id="imageInput" accept="image/*" style="margin-top: 0.5rem;" />
+                            </div>
+                      
+                            <div>
+                              <label for="formatSelect" style="font-weight: bold;">Convert to:</label><br />
+                              <select id="formatSelect" style="margin-top: 0.5rem; padding: 0.5rem; border-radius: 8px; border: 1px solid #ccc; width: 100%;">
+                                <option value="image/png">PNG</option>
+                                <option value="image/jpeg">JPG</option>
+                                <option value="image/webp">WEBP</option>
+                                <option value="image/bmp">BMP</option>
+                              </select>
+                            </div>
+                          </div>
+                      
+                          <!-- Right Column -->
+                          <div id="preview" style="flex: 1; min-width: 250px; text-align: center;">
+                            <p style="font-style: italic; color: #888;">No image uploaded yet</p>
+                          </div>
+                        </div>
+                      
+                        <!-- Convert Button -->
+                        <div style="text-align: center; margin-top: 2rem;">
+                          <button onclick="convertImage()" class="button" style="background-color: rgb(199, 44, 65); color: white; padding: 0.75rem 1.5rem; font-size: 1rem; border-radius: 8px;">Convert & Download</button>
+                        </div>
+                      </section>
+                      
+				</div>
+			</section>
+
+			<!-- Footer -->
+			<section id="footer">
+				<div class="container">
+					<div class="row">
+						<div class="col-12">
+							<div id="copyright">
+								<ul class="links">
+									<li>&copy; Abhishek Bamotra. All rights reserved.</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+		</div>
+
+		<!-- Scripts -->
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/browser.min.js"></script>
+		<script src="assets/js/breakpoints.min.js"></script>
+		<script src="assets/js/util.js"></script>
+		<script src="assets/js/main.js"></script>
+
+		<!-- Image Converter Script -->
+		<script>
+            let originalImage = new Image();
+            let imageDataURL = '';
+            let originalFilename = ''; 
+        
+            document.getElementById('imageInput').addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (!file) return;
+        
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    imageDataURL = event.target.result;
+                    originalImage.src = imageDataURL;
+                    originalFilename = file.name;
+        
+                    // Wait for image to load before setting preview
+                    originalImage.onload = () => {
+                        document.getElementById('preview').innerHTML = `
+                            <img src="${imageDataURL}" alt="Preview" style="max-width:300px;margin-top:20px">
+                            <p>
+                                Original resolution: ${originalImage.naturalWidth} x ${originalImage.naturalHeight}<br>
+                                File name: ${originalFilename}
+                            </p>`;
+                                
+                    };
+                };
+                reader.readAsDataURL(file);
+            });
+        
+            function convertImage() {
+                const format = document.getElementById('formatSelect').value;
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+        
+                // Set canvas size to original image size
+                canvas.width = originalImage.naturalWidth;
+                canvas.height = originalImage.naturalHeight;
+                ctx.drawImage(originalImage, 0, 0);
+        
+                // Use toBlob with quality parameter for image/jpeg
+                const quality = format === 'image/jpeg' ? 1.0 : undefined; // 1.0 = highest quality for JPEG
+        
+                canvas.toBlob(blob => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    const ext = format.split('/')[1];
+                    link.download = `${originalFilename}_converted.${ext}`;
+                    link.click();
+                }, format, quality);
+            }
+        </script>
+        
+	</body>
+</html>
