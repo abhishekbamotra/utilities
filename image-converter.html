@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-		<title>Everyday tools! Utilities.</title>
+		<title>Image Converter - Utilities.</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
@@ -145,7 +145,8 @@
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(blob);
                     const ext = format.split('/')[1];
-                    link.download = `${originalFilename}_converted.${ext}`;
+                    const fileNameWithoutExt = originalFilename.substring(0, originalFilename.lastIndexOf('.')) || originalFilename;
+                    link.download = `${fileNameWithoutExt}_converted.${ext}`;
                     link.click();
                 }, format, quality);
             }

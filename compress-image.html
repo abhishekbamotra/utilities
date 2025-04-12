@@ -1,0 +1,212 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Compress Image - Utilities.</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+</head>
+<body class="homepage is-preload">
+    <div id="page-wrapper">
+
+        <!-- Header -->
+        <section id="header">
+            <div style="display: flex;align-items: center;justify-content: center;flex-wrap: wrap;gap: 20px;padding: 0 1em;text-align: right;">
+                <h1 style="margin: 0;">
+                    <a href="index.html" style="text-decoration: none;">
+                        <span style="color: black;">Util</span><span style="color: rgb(199, 44, 65);">ities</span>
+                    </a>
+                </h1>
+                <div style="font-size: 2em; color: #ccc;">|</div>
+                <div style="text-align: left;">
+                    <h2 style="margin: 0;">All Your Everyday Tools, <span style="color: rgb(199, 44, 65);">One</span> Click Away.</h2>
+                    <p style="margin: 0;">One Toolkit. Endless Possibilities.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main -->
+        <section id="main">
+            <div class="container">
+                <header class="major">
+                    <h2>Image <span style="color: rgb(199, 44, 65);">Compressor</span></h2>
+                </header>
+
+                <section class="box">
+                    <header>
+                        <h3>Compress any image (JPG, PNG, WEBP, BMP) and control quality</h3>
+                    </header>
+
+                    <div style="display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center;">
+                        <!-- Left Column -->
+                        <div style="flex: 1; min-width: 250px;">
+                            <div style="margin-bottom: 1rem;">
+                                <label for="imageInput" style="font-weight: bold;">Upload Image</label><br />
+                                <input type="file" id="imageInput" accept="image/*" style="margin-top: 0.5rem;" />
+                            </div>
+
+                            <div style="margin-bottom: 1rem;">
+                                <label for="formatSelect" style="font-weight: bold;">Output Format:</label><br />
+                                <select id="formatSelect" style="margin-top: 0.5rem; padding: 0.5rem; border-radius: 8px; border: 1px solid #ccc; width: 100%;">
+                                    <option value="image/jpeg">JPEG</option>
+                                    <option value="image/webp">WEBP</option>
+                                    <option value="image/png">PNG</option>
+                                    <option value="image/bmp">BMP</option>
+                                </select>
+                            </div>
+
+                            <div style="margin-top: 1rem;">
+                                <label for="qualitySlider" style="font-weight: bold;">Compression Quality:</label>
+                                <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.5rem;">
+                                  <input type="range" id="qualitySlider" min="10" max="100" value="80"
+                                         style="flex: 1; appearance: auto; cursor: pointer;" />
+                                  <input type="number" id="qualityInput" min="10" max="100" value="80"
+                                         style="width: 60px; padding: 0.3rem; text-align: center; border: 1px solid #ccc; border-radius: 6px;" />%
+                                </div>
+                              </div>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div id="preview" style="flex: 1; min-width: 250px; text-align: center;">
+                            <p style="font-style: italic; color: #888;">No image uploaded yet</p>
+                        </div>
+                    </div>
+
+                    <!-- Compress Button -->
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button onclick="compressImage()" class="button" style="background-color: rgb(199, 44, 65); color: white; padding: 0.75rem 1.5rem; font-size: 1rem; border-radius: 8px;">Compress & Download</button>
+                    </div>
+                </section>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <section id="footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div id="copyright">
+                            <ul class="links">
+                                <li>&copy; Abhishek Bamotra. All rights reserved.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/browser.min.js"></script>
+    <script src="assets/js/breakpoints.min.js"></script>
+    <script src="assets/js/util.js"></script>
+    <script src="assets/js/main.js"></script>
+
+    <!-- Image Compressor Script -->
+    <script>
+        let originalImage = new Image();
+        let imageDataURL = '';
+        let originalFilename = '';
+        let originalFileSize = 0;
+    
+        const imageInput = document.getElementById('imageInput');
+        const formatSelect = document.getElementById('formatSelect');
+        const qualitySlider = document.getElementById('qualitySlider');
+        const qualityValue = document.getElementById('qualityValue');
+        const estimatedSizeText = document.getElementById('estimatedSize');
+        
+        const qualityInput = document.getElementById('qualityInput');
+
+        qualitySlider.addEventListener('input', () => {
+            qualityInput.value = qualitySlider.value;
+            estimateCompressedSize();
+        });
+
+        qualityInput.addEventListener('input', () => {
+            let val = parseInt(qualityInput.value);
+            if (isNaN(val) || val < 10) val = 10;
+            if (val > 100) val = 100;
+            qualityInput.value = val;
+            qualitySlider.value = val;
+            estimateCompressedSize();
+        });
+
+        imageInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+    
+            originalFileSize = file.size;
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                imageDataURL = event.target.result;
+                originalImage.src = imageDataURL;
+                originalFilename = file.name;
+    
+                originalImage.onload = () => {
+                    const sizeKB = (originalFileSize / 1024).toFixed(2);
+                    document.getElementById('preview').innerHTML = `
+                        <img src="${imageDataURL}" alt="Preview" style="max-width:300px;margin-top:20px">
+                        <p>
+                            Resolution: ${originalImage.naturalWidth} x ${originalImage.naturalHeight}<br>
+                            File name: ${originalFilename}<br>
+                            Original size: ${sizeKB} KB
+                        </p>
+                        <p id="estimatedSize" style="color: gray; font-style: italic;">Estimating...</p>
+                    `;
+                    estimateCompressedSize();
+                };
+            };
+            reader.readAsDataURL(file);
+        });
+    
+        qualitySlider.addEventListener('input', function () {
+            qualityValue.textContent = qualitySlider.value;
+            estimateCompressedSize();
+        });
+    
+        formatSelect.addEventListener('change', estimateCompressedSize);
+    
+        function estimateCompressedSize() {
+            if (!originalImage.src) return;
+    
+            const format = formatSelect.value;
+            const quality = qualitySlider.value / 100;
+    
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = originalImage.naturalWidth;
+            canvas.height = originalImage.naturalHeight;
+            ctx.drawImage(originalImage, 0, 0);
+    
+            canvas.toBlob(blob => {
+                const sizeKB = (blob.size / 1024).toFixed(2);
+                const label = `Estimated size after compression: ${sizeKB} KB`;
+                const estimateDisplay = document.getElementById('estimatedSize');
+                if (estimateDisplay) estimateDisplay.textContent = label;
+            }, format, quality);
+        }
+    
+        function compressImage() {
+            const format = formatSelect.value;
+            const quality = qualitySlider.value / 100;
+    
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = originalImage.naturalWidth;
+            canvas.height = originalImage.naturalHeight;
+            ctx.drawImage(originalImage, 0, 0);
+    
+            canvas.toBlob(blob => {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                const ext = format.split('/')[1];
+                link.download = `${originalFilename.split('.')[0]}_compressed.${ext}`;
+                link.click();
+            }, format, quality);
+        }
+    </script>
+    
+</body>
+</html>
