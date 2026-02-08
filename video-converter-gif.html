@@ -212,24 +212,34 @@
 
             // Initialize FFmpeg
             async function loadFFmpeg() {
-                if (ffmpeg) return;
-                statusText.innerText = "Initializing video engine...";
-                ffmpeg = new FFmpeg();
-                const coreBaseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
-                const ffmpegBaseURL = 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/esm';
+    if (ffmpeg) return;
+    
+    statusText.innerText = "Initializing video engine...";
+    ffmpeg = new FFmpeg();
+    
+    // Base URLs
+    const coreBaseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+    const ffmpegBaseURL = 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/esm';
 
-                try {
-                    await ffmpeg.load({
-                        coreURL: await toBlobURL(`${coreBaseURL}/ffmpeg-core.js`, 'text/javascript'),
-                        wasmURL: await toBlobURL(`${coreBaseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-                        workerURL: await toBlobURL(`${ffmpegBaseURL}/worker.js`, 'text/javascript'),
-                    });
-                    statusText.innerText = "";
-                } catch (e) {
-                    statusText.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
-                }
-            }
-
+    try {
+        await ffmpeg.load({
+            // 1. Load the Core Logic as a Blob
+            coreURL: await toBlobURL(`${coreBaseURL}/ffmpeg-core.js`, 'text/javascript'),
+            
+            // 2. Load the WebAssembly Binary as a Blob
+            wasmURL: await toBlobURL(`${coreBaseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+            
+            // 3. CRITICAL FIX: Load the Worker Script as a Blob
+            // This bypasses the "cannot be accessed from origin" error
+            workerURL: await toBlobURL(`${ffmpegBaseURL}/worker.js`, 'text/javascript'),
+        });
+        
+        statusText.innerText = "Engine Ready.";
+    } catch (e) {
+        statusText.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
+        console.error(e);
+    }
+}
             // --- Time Slider Logic ---
             function updateStart(val) {
                 const v = parseFloat(val);
