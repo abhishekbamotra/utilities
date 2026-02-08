@@ -1,0 +1,393 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Video Converter - Utilities.</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+        <style>
+            /* Progress Bar Styling */
+            .progress-container {
+                width: 100%;
+                background-color: #eee;
+                border-radius: 8px;
+                margin-top: 1rem;
+                height: 20px;
+                overflow: hidden;
+                display: none;
+            }
+            .progress-bar {
+                height: 100%;
+                width: 0%;
+                background-color: rgb(199, 44, 65);
+                transition: width 0.4s ease;
+            }
+            .status-text {
+                font-size: 0.9em;
+                color: #666;
+                margin-top: 0.5rem;
+                text-align: center;
+                min-height: 1.5em;
+            }
+
+            /* Video Preview Styling */
+            video {
+                max-width: 100%;
+                max-height: 300px; 
+                width: auto;      
+                border-radius: 8px;
+                margin-top: 10px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                background: #000;
+            }
+            
+            /* Time Slider Group */
+            .time-controls {
+                display: none; /* Hidden until video loads */
+                flex-direction: column;
+                gap: 15px;
+                margin-top: 1.5rem;
+                background: #f9f9f9;
+                padding: 15px;
+                border-radius: 8px;
+                border: 1px solid #eee;
+            }
+            
+            .control-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .control-row label {
+                font-weight: bold;
+                font-size: 0.9em;
+                width: 50px;
+            }
+            .control-row input[type="number"] {
+                width: 80px;
+                padding: 0.4rem;
+                border-radius: 4px;
+                border: 1px solid #ccc;
+            }
+            .control-row input[type="range"] {
+                flex: 1;
+                cursor: pointer;
+            }
+        </style>
+	</head>
+	<body class="homepage is-preload">
+		<div id="page-wrapper">
+
+			<section id="header">
+                <div style="display: flex;align-items: center;justify-content: center;flex-wrap: wrap;gap: 20px;padding: 0 1em;text-align: right;">
+                    <h1 style="margin: 0;">
+                        <a href="index.html" style="text-decoration: none;">
+                            <span style="color: black;">Util</span><span style="color: rgb(199, 44, 65);">ities</span>
+                        </a>
+                    </h1>
+                <div style="font-size: 2em; color: #ccc;">|</div>
+                    <div style="text-align: left;">
+                        <h2 style="margin: 0;">All Your Everyday Tools, <span style="color: rgb(199, 44, 65);">One</span> Click Away.</h2>
+                        <p style="margin: 0;">One Toolkit. Endless Possibilities.</p>
+                    </div>
+                </div>
+			</section>
+
+			<section id="main">
+				<div class="container">
+					<header class="major">
+						<h2>Video <span style="color: rgb(199, 44, 65);">Converter</span></h2>
+					</header>
+
+                    <section class="box">
+                        <header>
+                          <h3>Convert & Trim Video (GIF, WebP, MP4)</h3>
+                        </header>
+                      
+                        <div style="display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center;">
+                          <div style="flex: 1; min-width: 250px;">
+                            <div style="margin-bottom: 1rem;">
+                              <label for="videoInput" style="font-weight: bold;">1. Upload Video</label><br />
+                              <input type="file" id="videoInput" accept="video/*" style="margin-top: 0.5rem; width:100%" />
+                            </div>
+                            
+                            <div class="time-controls" id="timeControls">
+                                <p style="margin:0; font-size:0.8em; color:#888;">Adjust sliders to trim video. Preview updates automatically.</p>
+                                
+                                <div class="control-row">
+                                    <label>Start</label>
+                                    <input type="number" id="startNum" value="0" min="0" step="0.1">
+                                    <input type="range" id="startRange" value="0" min="0" step="0.1">
+                                </div>
+
+                                <div class="control-row">
+                                    <label>End</label>
+                                    <input type="number" id="endNum" value="0" min="0" step="0.1">
+                                    <input type="range" id="endRange" value="0" min="0" step="0.1">
+                                </div>
+                            </div>
+                      
+                            <div style="margin-top: 1rem;">
+                              <label for="formatSelect" style="font-weight: bold;">2. Convert to:</label><br />
+                              <select id="formatSelect" style="margin-top: 0.5rem; padding: 0.5rem; border-radius: 8px; border: 1px solid #ccc; width: 100%;">
+                                <option value="gif">GIF (Animated Image)</option>
+                                <option value="webp">WebP (Efficient Animation)</option>
+                                <option value="mp4">MP4 (Compress)</option>
+                              </select>
+                            </div>
+
+                            <div style="margin-top: 2rem;">
+                                <button id="convertBtn" onclick="convertVideo()" class="button" style="background-color: rgb(199, 44, 65); color: white; padding: 0.75rem 1.5rem; font-size: 1rem; border-radius: 8px; width: 100%;">Convert & Download</button>
+                            </div>
+
+                            <div class="progress-container" id="progressContainer">
+                                <div class="progress-bar" id="progressBar"></div>
+                            </div>
+                            <div class="status-text" id="statusText"></div>
+                          </div>
+                      
+                          <div id="preview" style="flex: 1; min-width: 250px; text-align: center;">
+                            <p id="placeholderText" style="font-style: italic; color: #888; margin-top: 2em;">No video uploaded yet</p>
+                            
+                            <div id="videoContainer" style="display:none;">
+                                <strong style="display:block; margin-bottom:5px; color:#666;">Original Preview</strong>
+                                <video id="originalVideo" controls playsinline></video>
+                                <p id="videoMeta" style="font-size: 0.8em; color: #888; margin-top: 5px;"></p>
+                            </div>
+
+                            <div id="outputContainer" style="display:none; margin-top: 20px;">
+                                <strong style="display:block; margin-bottom:5px; color: rgb(199, 44, 65);">Result</strong>
+                                <img id="outputImage" style="max-width: 100%; max-height: 300px; border-radius: 8px; display: none;" />
+                                <video id="outputVideo" controls style="max-height: 300px; display: none;"></video>
+                                <br/>
+                                <a id="downloadLink" class="button" style="margin-top: 10px; font-size: 0.8rem;">Download Result</a>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+				</div>
+			</section>
+
+			<section id="footer">
+				<div class="container">
+					<div class="row">
+						<div class="col-12">
+							<div id="copyright">
+								<ul class="links">
+									<li>&copy; Abhishek Bamotra. All rights reserved.</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+		</div>
+
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/browser.min.js"></script>
+		<script src="assets/js/breakpoints.min.js"></script>
+		<script src="assets/js/util.js"></script>
+		<script src="assets/js/main.js"></script>
+
+		<script type="module">
+            import { FFmpeg } from 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js';
+            import { fetchFile, toBlobURL } from 'https://unpkg.com/@ffmpeg/util@0.12.1/dist/esm/index.js';
+
+            let ffmpeg = null;
+            
+            // Elements
+            const fileInput = document.getElementById('videoInput');
+            const convertBtn = document.getElementById('convertBtn');
+            const statusText = document.getElementById('statusText');
+            const progressBar = document.getElementById('progressBar');
+            const progressContainer = document.getElementById('progressContainer');
+            const videoPreview = document.getElementById('originalVideo');
+            
+            // Time Elements
+            const timeControls = document.getElementById('timeControls');
+            const startNum = document.getElementById('startNum');
+            const startRange = document.getElementById('startRange');
+            const endNum = document.getElementById('endNum');
+            const endRange = document.getElementById('endRange');
+
+            // Initialize FFmpeg
+            async function loadFFmpeg() {
+                if (ffmpeg) return;
+                statusText.innerText = "Initializing video engine...";
+                ffmpeg = new FFmpeg();
+                const coreBaseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+                const ffmpegBaseURL = 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/esm';
+
+                try {
+                    await ffmpeg.load({
+                        coreURL: await toBlobURL(`${coreBaseURL}/ffmpeg-core.js`, 'text/javascript'),
+                        wasmURL: await toBlobURL(`${coreBaseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+                        workerURL: await toBlobURL(`${ffmpegBaseURL}/worker.js`, 'text/javascript'),
+                    });
+                    statusText.innerText = "";
+                } catch (e) {
+                    statusText.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
+                }
+            }
+
+            // --- Time Slider Logic ---
+            function updateStart(val) {
+                const v = parseFloat(val);
+                startNum.value = v;
+                startRange.value = v;
+                videoPreview.currentTime = v; // Jump to time
+                // Enforce constraint
+                if(parseFloat(endNum.value) <= v) updateEnd(v + 1);
+            }
+
+            function updateEnd(val) {
+                const v = parseFloat(val);
+                endNum.value = v;
+                endRange.value = v;
+                videoPreview.currentTime = v; // Jump to time
+            }
+
+            // Sync Listeners
+            startRange.addEventListener('input', (e) => updateStart(e.target.value));
+            startNum.addEventListener('change', (e) => updateStart(e.target.value));
+            
+            endRange.addEventListener('input', (e) => updateEnd(e.target.value));
+            endNum.addEventListener('change', (e) => updateEnd(e.target.value));
+
+
+            // --- File Upload & Metadata ---
+            fileInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // Reset UI
+                document.getElementById('placeholderText').style.display = 'none';
+                document.getElementById('videoContainer').style.display = 'block';
+                document.getElementById('outputContainer').style.display = 'none';
+                
+                // Load video
+                const url = URL.createObjectURL(file);
+                videoPreview.src = url;
+
+                // Initialize Sliders when video loads
+                videoPreview.onloadedmetadata = () => {
+                    const dur = videoPreview.duration;
+                    
+                    // Set max values
+                    startRange.max = dur;
+                    startNum.max = dur;
+                    endRange.max = dur;
+                    endNum.max = dur;
+
+                    // Set default values (Full duration)
+                    updateStart(0);
+                    updateEnd(dur); // Set end to full duration initially
+                    
+                    timeControls.style.display = 'flex';
+                    document.getElementById('videoMeta').innerText = `Total Duration: ${dur.toFixed(1)}s`;
+                };
+                
+                await loadFFmpeg();
+            });
+
+            // --- Conversion ---
+            window.convertVideo = async () => {
+                const file = fileInput.files[0];
+                if (!file) { alert("Please upload a video first."); return; }
+                if (!ffmpeg || !ffmpeg.loaded) await loadFFmpeg();
+
+                const format = document.getElementById('formatSelect').value;
+                const inputName = 'input.mp4';
+                const outputName = `output.${format}`;
+                
+                // Get Trim Values
+                const start = parseFloat(startNum.value) || 0;
+                let end = parseFloat(endNum.value) || 0;
+                
+                // Calculate Duration
+                if (end <= start) end = start + 1; 
+                const duration = (end - start).toString();
+
+                // UI Reset
+                convertBtn.disabled = true;
+                convertBtn.style.opacity = "0.5";
+                convertBtn.innerText = "Converting...";
+                progressContainer.style.display = 'block';
+                progressBar.style.width = '0%';
+                
+                try {
+                    await ffmpeg.writeFile(inputName, await fetchFile(file));
+
+                    let startTime = Date.now();
+
+                    ffmpeg.on('progress', ({ progress }) => {
+                        const p = Math.max(0, Math.min(1, progress));
+                        const pct = Math.round(p * 100);
+                        progressBar.style.width = `${pct}%`;
+                        
+                        if (pct > 0) {
+                            const now = Date.now();
+                            const elapsed = (now - startTime) / 1000;
+                            const totalEst = elapsed / p;
+                            const remain = Math.max(0, Math.ceil(totalEst - elapsed));
+                            statusText.innerText = `Processing: ${pct}% (ETA: ${remain}s)`;
+                        } else {
+                            statusText.innerText = `Processing: ${pct}%`;
+                        }
+                    });
+
+                    // Build Commands
+                    // -ss before -i is faster seeking, -t is duration
+                    let commands = ['-ss', start.toString(), '-t', duration, '-i', inputName];
+
+                    if (format === 'gif') {
+                        commands.push('-vf', 'fps=10,scale=320:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse');
+                    } else if (format === 'webp') {
+                        commands.push('-vcodec', 'libwebp', '-lossless', '1', '-loop', '0', '-preset', 'default', '-an', '-vsync', '0');
+                    } else if (format === 'mp4') {
+                        commands.push('-vcodec', 'libx264', '-crf', '28', '-preset', 'fast'); 
+                    }
+                    
+                    commands.push(outputName);
+
+                    await ffmpeg.exec(commands);
+
+                    const data = await ffmpeg.readFile(outputName);
+                    const blobType = format === 'mp4' ? 'video/mp4' : `image/${format}`;
+                    const url = URL.createObjectURL(new Blob([data.buffer], { type: blobType }));
+
+                    // Show Output
+                    const outContainer = document.getElementById('outputContainer');
+                    const outImg = document.getElementById('outputImage');
+                    const outVid = document.getElementById('outputVideo');
+                    const dlLink = document.getElementById('downloadLink');
+
+                    outContainer.style.display = 'block';
+                    dlLink.href = url;
+                    dlLink.download = `converted.${format}`;
+
+                    if (format === 'mp4') {
+                        outImg.style.display = 'none';
+                        outVid.style.display = 'block';
+                        outVid.src = url;
+                    } else {
+                        outVid.style.display = 'none';
+                        outImg.style.display = 'block';
+                        outImg.src = url;
+                    }
+
+                    statusText.innerText = "Done!";
+                    progressBar.style.width = "100%";
+
+                } catch (err) {
+                    console.error(err);
+                    statusText.innerHTML = `<span style="color:red">Error: ${err.message}</span>`;
+                } finally {
+                    convertBtn.disabled = false;
+                    convertBtn.style.opacity = "1";
+                    convertBtn.innerText = "Convert & Download";
+                }
+            };
+        </script>
+	</body>
+</html>
